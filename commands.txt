@@ -1,36 +1,44 @@
-=== CHECK (on lab PC) ===
-python3 --version
+=== 1. CHECK  (FIRST thing on lab PC) ===
+python3 --version                       # need this to download correct wheels
 python3 -c "import tensorflow, pandas, sklearn, matplotlib, seaborn, PIL, scipy; print('ALL OK')"
-python3 -c "import tensorflow as tf; print(tf.__version__)"
-pip list | grep -i -E "tensorflow|keras|pandas|scikit|matplotlib|seaborn|pillow"
+# ALL OK  -> skip to step 5 (Jupyter). Error -> do steps 2-4.
 
-=== DOWNLOAD WHEELS (on laptop, WITH internet; set 3.12 = lab python version) ===
+=== 2. DOWNLOAD WHEELS  (on laptop WITH internet, before exam; set 3.12 = lab python version) ===
 pip download tensorflow pandas scikit-learn matplotlib seaborn pillow scipy -d dl_wheels --only-binary=:all: --python-version 3.12 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux_2_28_x86_64
+# copy dl_wheels folder to pendrive
 
-=== INSTALL OFFLINE (on lab PC, from pendrive folder) ===
-pip install --no-index --find-links dl_wheels tensorflow pandas scikit-learn matplotlib seaborn pillow scipy
-# if "externally-managed-environment" error, add:  --user --break-system-packages
+=== 3. CREATE + START VENV  (on lab PC, only if libraries missing) ===
+cd ~/Desktop/DL                                  # go to project folder
+python3 -m venv --system-site-packages venv      # create (once). keeps lab's jupyter usable
+source venv/bin/activate                         # start (EVERY new terminal). prompt shows (venv)
+which python                                     # check: should end with DL/venv/bin/python
+deactivate                                       # stop venv when done
+# "ensurepip is not available" error -> venv not possible, skip step 3, use --user option in step 4
 
-=== PENDRIVE / FILES ===
-lsblk                                   # find pendrive
-cd /media/$USER/                        # pendrive is usually here
-cp -r /media/$USER/<PENDRIVE>/Exam_Programs ~/Desktop/
-cd ~/Desktop/Exam_Programs
-ls
+=== 4. INSTALL OFFLINE  (on lab PC, after activating venv) ===
+pip install --no-index --find-links /media/$USER/<PENDRIVE>/dl_wheels tensorflow pandas scikit-learn matplotlib seaborn pillow scipy
+# without venv: add  --user --break-system-packages  at the end
 
-=== UNZIP DATASET (if you only have zips) ===
-mkdir -p dataset && cd dataset
-unzip "mnist-jpg (1).zip"   # same for cifar-10-img, ecg-csv, creditcardfraud-csv
-cd ..
+=== 5. JUPYTER  (inside DL folder; activate venv first if you made one) ===
+python3 -m notebook                     # or: jupyter notebook
+# Kernel > Restart & Run All  -> run whole notebook
+# Shift+Enter run cell | Esc+A / Esc+B new cell above/below | Esc+DD delete cell
+# Ctrl+C in terminal -> stop jupyter
 
-=== JUPYTER ===
-jupyter notebook                        # run INSIDE Exam_Programs folder
-python3 -m notebook                     # if "jupyter" command not found
-# Kernel > Restart & Run All  -> runs whole notebook
-# Shift+Enter -> run cell | Esc+A / Esc+B -> new cell above/below | Esc+DD -> delete cell
+=== GET FILES ===
+git clone https://github.com/Kalash-B/DL.git     # if internet (no login needed)
+lsblk                                            # find pendrive
+cp -r /media/$USER/<PENDRIVE>/dataset ~/Desktop/DL/    # datasets -> DL/dataset/
+ls ~/Desktop/DL/dataset                          # should show mnist-jpg cifar-10-img ecg-csv creditcardfraud-csv
+unzip "mnist-jpg (1).zip" -d dataset             # only if you carried zips
 
 === IF ERRORS ===
-FileNotFoundError  -> notebook not opened from Exam_Programs folder, or wrong dataset path
-Too slow / RAM full -> reduce epochs=  and  batch_size= in flow_from_directory
-VGG16 download error -> keep vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5 next to notebook
-ModuleNotFoundError: X -> pip install X (offline: use dl_wheels command above)
+FileNotFoundError        -> jupyter not started in DL folder / dataset folder missing
+ModuleNotFoundError: X   -> venv not activated, or X not installed (step 4)
+Too slow / RAM full      -> reduce epochs=  and  batch_size= in flow_from_directory
+VGG16 download error     -> keep vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5 next to notebook
+
+=== AFTER EXAM (clean up) ===
+deactivate
+cd ~ && rm -rf ~/Desktop/DL             # delete project + venv
+history -c && history -w                # clear command history (every open terminal)
