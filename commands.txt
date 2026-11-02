@@ -1,0 +1,36 @@
+=== CHECK (on lab PC) ===
+python3 --version
+python3 -c "import tensorflow, pandas, sklearn, matplotlib, seaborn, PIL, scipy; print('ALL OK')"
+python3 -c "import tensorflow as tf; print(tf.__version__)"
+pip list | grep -i -E "tensorflow|keras|pandas|scikit|matplotlib|seaborn|pillow"
+
+=== DOWNLOAD WHEELS (on laptop, WITH internet; set 3.12 = lab python version) ===
+pip download tensorflow pandas scikit-learn matplotlib seaborn pillow scipy -d dl_wheels --only-binary=:all: --python-version 3.12 --platform manylinux2014_x86_64 --platform manylinux_2_17_x86_64 --platform manylinux_2_28_x86_64
+
+=== INSTALL OFFLINE (on lab PC, from pendrive folder) ===
+pip install --no-index --find-links dl_wheels tensorflow pandas scikit-learn matplotlib seaborn pillow scipy
+# if "externally-managed-environment" error, add:  --user --break-system-packages
+
+=== PENDRIVE / FILES ===
+lsblk                                   # find pendrive
+cd /media/$USER/                        # pendrive is usually here
+cp -r /media/$USER/<PENDRIVE>/Exam_Programs ~/Desktop/
+cd ~/Desktop/Exam_Programs
+ls
+
+=== UNZIP DATASET (if you only have zips) ===
+mkdir -p dataset && cd dataset
+unzip "mnist-jpg (1).zip"   # same for cifar-10-img, ecg-csv, creditcardfraud-csv
+cd ..
+
+=== JUPYTER ===
+jupyter notebook                        # run INSIDE Exam_Programs folder
+python3 -m notebook                     # if "jupyter" command not found
+# Kernel > Restart & Run All  -> runs whole notebook
+# Shift+Enter -> run cell | Esc+A / Esc+B -> new cell above/below | Esc+DD -> delete cell
+
+=== IF ERRORS ===
+FileNotFoundError  -> notebook not opened from Exam_Programs folder, or wrong dataset path
+Too slow / RAM full -> reduce epochs=  and  batch_size= in flow_from_directory
+VGG16 download error -> keep vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5 next to notebook
+ModuleNotFoundError: X -> pip install X (offline: use dl_wheels command above)
